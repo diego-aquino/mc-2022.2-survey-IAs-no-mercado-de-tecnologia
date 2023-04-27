@@ -1,0 +1,1 @@
+# mc-2022.2-survey-IAs-no-mercado-de-tecnologia
