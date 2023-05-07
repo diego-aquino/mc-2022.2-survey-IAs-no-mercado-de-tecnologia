@@ -15,3 +15,7 @@ Este estudo tem como objetivo coletar opiniões e percepções de profissionais 
 - [Questionário final](https://drive.google.com/file/d/1mV9bBaWcPZvwSm6W92adP81Am7ycxJPi/view?usp=sharing)
 
   Esta versão foi melhorada com base no feedback recebido no questionário inicial, para torná-lo mais objetivo e facilitar a análise dos dados.
+
+## Artigo
+
+Está pesquisa está em andamento. O artigo científico e os resultados serão publicados em breve.
