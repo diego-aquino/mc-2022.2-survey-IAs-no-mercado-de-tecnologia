@@ -1,5 +1,5 @@
 # Importando as bibliotecas
-install.packages('tidyverse')
+if (!require('tidyverse')) install.packages('tidyverse')
 library('tidyverse')
 
 # Importando o dataset
@@ -13,7 +13,7 @@ summary(respostas)
 # Criando 5 dataframes diferentes: 1 com as respostas da caracterização da amostra e 1 para as
 # respostas das 4 hipóteses
 
-caracterizacao_amostra <- select(respostas, Quais.são.as.suas.áreas.de.atuação., 
+caracterizacao_amostra <- select(respostas, Quais.são.as.suas.áreas.de.atuação.,
                                  Quanto.tempo.de.experiência.profissional.você.possui.na.área.de.tecnologia.,
                                  Você.utiliza.ferramentas.de.IAs.conversacionais.e.de.geração.de.código.profissionalmente.,
                                  Para.quais.propósitos.você.utiliza.IAs.conversacionais.e.de.geração.de.código.profissionalmente.,
@@ -86,9 +86,9 @@ hipotese4_futuro <- transform(hipotese4_futuro, Resposta = as.numeric(Resposta))
 
 # Comparando média, mediana e desvio padrao
 
-tabela <- matrix(c(mean(hipotese1_produtividade$Resposta), median(hipotese1_produtividade$Resposta), sd(hipotese1_produtividade$Resposta), 
+tabela <- matrix(c(mean(hipotese1_produtividade$Resposta), median(hipotese1_produtividade$Resposta), sd(hipotese1_produtividade$Resposta),
                    mean(hipotese2_satisfacao$Resposta), median(hipotese2_satisfacao$Resposta), sd(hipotese2_satisfacao$Resposta),
-                   mean(hipotese3_cargos$Resposta), median(hipotese3_cargos$Resposta), sd(hipotese3_cargos$Resposta), 
+                   mean(hipotese3_cargos$Resposta), median(hipotese3_cargos$Resposta), sd(hipotese3_cargos$Resposta),
                    mean(hipotese4_futuro$Resposta), median(hipotese4_futuro$Resposta), sd(hipotese4_futuro$Resposta)), ncol=3, byrow=TRUE)
 colnames(tabela) <- c('Média','Mediana','Desvio padrão')
 rownames(tabela) <- c('Hipótese 1 - produtividade','Hipótese 2 - satisfação','Hipótese 3 - cargos','Hipótese 4 - futuro')
@@ -96,3 +96,144 @@ tabela <- as.table(tabela)
 tabela
 
 # Gerando gráficos de barras
+# ...
+
+# Parâmetros gerais
+confianca <- 0.85 # Confiança do teste
+alpha <- 0.15 # Probabilidade do Erro Tipo 1
+erro <- 0.15 # Erro máximo tolerável
+
+z <- qnorm(confianca + (1 - confianca) / 2)
+
+# Cálculo do tamanho mínimo da amostra - Hipótese 1 (produtividade)
+hipotese1_variancia <- sd(hipotese1_produtividade$Resposta)
+hipotese1_tamanho_minimo_amostra <- (z * hipotese1_variancia / erro) ** 2
+hipotese1_tamanho_minimo_amostra
+
+# Intervalo de confiança - Hipótese 1 (produtividade)
+hipotese1_erro <- z * hipotese1_variancia / (length(hipotese1_produtividade) ** 0.5)
+hipotese1_erro
+
+hipotese1_media <- mean(hipotese1_produtividade$Resposta)
+
+hipotese1_intervalo_confianca <- c(
+  max(hipotese1_media - hipotese1_erro, 1),
+  min(hipotese1_media + hipotese1_erro, 5)
+)
+hipotese1_intervalo_confianca
+
+# Teste - Hipótese 1 (produtividade)
+hipotese1_teste <- t.test(
+  hipotese1_produtividade$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+hipotese1_teste
+
+if (hipotese1_teste$p.value >= alpha) {
+  print("Hipótese 1: H0 não rejeitada")
+} else {
+  print("Hipótese 1: H0 rejeitada")
+}
+
+# Cálculo do tamanho mínimo da amostra - Hipótese 2 (satisfação)
+hipotese2_variancia <- sd(hipotese2_satisfacao$Resposta)
+hipotese2_tamanho_minimo_amostra <- (z * hipotese2_variancia / erro) ** 2
+hipotese2_tamanho_minimo_amostra
+
+# Intervalo de confiança - Hipótese 2 (satisfação)
+hipotese2_erro <- z * hipotese2_variancia / (length(hipotese2_satisfacao) ** 0.5)
+hipotese2_erro
+
+hipotese2_media <- mean(hipotese2_satisfacao$Resposta)
+
+hipotese2_intervalo_confianca <- c(
+  max(hipotese2_media - hipotese2_erro, 1),
+  min(hipotese2_media + hipotese2_erro, 5)
+)
+hipotese2_intervalo_confianca
+
+# Teste - Hipótese 2 (satisfação)
+hipotese2_teste <- t.test(
+  hipotese2_satisfacao$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+hipotese2_teste
+
+if (hipotese2_teste$p.value >= alpha) {
+  print("Hipótese 2: H0 não rejeitada")
+} else {
+  print("Hipótese 2: H0 rejeitada")
+}
+
+# Cálculo do tamanho mínimo da amostra - Hipótese 3 (cargos)
+hipotese3_variancia <- sd(hipotese3_cargos$Resposta)
+hipotese3_tamanho_minimo_amostra <- (z * hipotese3_variancia / erro) ** 2
+hipotese3_tamanho_minimo_amostra
+
+# Intervalo de confiança - Hipótese 3 (cargos)
+hipotese3_variancia <- sd(hipotese3_cargos$Resposta)
+hipotese3_tamanho_minimo_amostra <- (z * hipotese3_variancia / erro) ** 2
+hipotese3_tamanho_minimo_amostra
+
+# Intervalo de confiança - Hipótese 2 (satisfação)
+hipotese3_erro <- z * hipotese3_variancia / (length(hipotese3_cargos) ** 0.5)
+hipotese3_erro
+
+hipotese3_media <- mean(hipotese3_cargos$Resposta)
+
+hipotese3_intervalo_confianca <- c(
+  max(hipotese3_media - hipotese3_erro, 1),
+  min(hipotese3_media + hipotese3_erro, 5)
+)
+hipotese3_intervalo_confianca
+
+# Teste - Hipótese 3 (cargos)
+hipotese3_teste <- t.test(
+  hipotese3_cargos$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+hipotese3_teste
+
+if (hipotese3_teste$p.value >= alpha) {
+  print("Hipótese 3: H0 não rejeitada")
+} else {
+  print("Hipótese 3: H0 rejeitada")
+}
+
+# Cálculo do tamanho mínimo da amostra - Hipótese 4 (futuro)
+hipotese4_variancia <- sd(hipotese4_futuro$Resposta)
+hipotese4_tamanho_minimo_amostra <- (z * hipotese4_variancia / erro) ** 2
+hipotese4_tamanho_minimo_amostra
+
+# Intervalo de confiança - Hipótese 4 (futuro)
+hipotese4_erro <- z * hipotese4_variancia / (length(hipotese4_futuro) ** 0.5)
+hipotese4_erro
+
+hipotese4_media <- mean(hipotese4_futuro$Resposta)
+
+hipotese4_intervalo_confianca <- c(
+  max(hipotese4_media - hipotese4_erro, 1),
+  min(hipotese4_media + hipotese4_erro, 5)
+)
+hipotese4_intervalo_confianca
+
+# Teste - Hipótese 4 (futuro)
+hipotese4_teste <- t.test(
+  hipotese4_futuro$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+hipotese4_teste
+
+if (hipotese4_teste$p.value >= alpha) {
+  print("Hipótese 4: H0 não rejeitada")
+} else {
+  print("Hipótese 4: H0 rejeitada")
+}
