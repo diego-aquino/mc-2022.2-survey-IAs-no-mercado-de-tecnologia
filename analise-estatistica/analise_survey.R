@@ -141,13 +141,12 @@ hipotese1_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
 )
 
 ## Intervalo de confiança
-hipotese1_intervalo_confianca <- calcular_ic_likert(
+hipotese1_media <- round(mean(hipotese1_produtividade$Resposta), digits=2)
+
+hipotese1_ic <- calcular_ic_likert(
   hipotese1_produtividade$Resposta
 )
-hipotese1_margem_erro <- round((
-  hipotese1_intervalo_confianca[2]
-  - hipotese1_intervalo_confianca[1]
-) / 2, digits=2)
+hipotese1_margem_erro <- round(hipotese1_media - hipotese1_ic[1], digits=2)
 
 ## Teste de hipótese
 hipotese1_teste <- t.test(
@@ -156,37 +155,6 @@ hipotese1_teste <- t.test(
   conf.level=confianca,
   alternative="greater"
 )
-hipotese1_teste
-
-writeLines(paste(
-  "[Hipótese 1] Tamanho mínimo da amostra: ",
-  hipotese1_tamanho_minimo_amostra,
-  "\n",
-  "[Hipótese 1] Intervalo de confiança: (",
-  hipotese1_intervalo_confianca[1],
-  ", ",
-  hipotese1_intervalo_confianca[2],
-  ")",
-  "\n",
-  "[Hipótese 1] Média: ",
-  round(mean(hipotese1_produtividade$Resposta), digits=2),
-  "\n",
-  "[Hipótese 1] Margem de erro: ",
-  hipotese1_margem_erro,
-  "\n",
-  "[Hipótese 1] Teste de hipótese - Valor p: ",
-  hipotese1_teste$p.value,
-  "\n",
-  "[Hipótese 1] Teste de hipótese - Signficância: ",
-  alpha,
-  "\n",
-  "[Hipótese 1] Teste de hipótese - Resultado: ",
-  if (hipotese1_teste$p.value >= alpha) {
-    "H0 não rejeitada"
-  } else {
-    "H0 rejeitada"
-  },
-  sep=""))
 
 # ______________________________________________________________________________
 
@@ -202,13 +170,12 @@ hipotese2_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
 )
 
 ## Intervalo de confiança
-hipotese2_intervalo_confianca <- calcular_ic_likert(
+hipotese2_media <- round(mean(hipotese2_satisfacao$Resposta), digits=2)
+
+hipotese2_ic <- calcular_ic_likert(
   hipotese2_satisfacao$Resposta
 )
-hipotese2_margem_erro <- round((
-  hipotese2_intervalo_confianca[2]
-  - hipotese2_intervalo_confianca[1]
-) / 2, digits=2)
+hipotese2_margem_erro <- round(hipotese2_media - hipotese2_ic[1], digits=2)
 
 ## Teste de hipótese
 hipotese2_teste <- t.test(
@@ -217,37 +184,6 @@ hipotese2_teste <- t.test(
   conf.level=confianca,
   alternative="greater"
 )
-hipotese2_teste
-
-writeLines(paste(
-  "[Hipótese 2] Tamanho mínimo da amostra: ",
-  hipotese2_tamanho_minimo_amostra,
-  "\n",
-  "[Hipótese 2] Intervalo de confiança: (",
-  hipotese2_intervalo_confianca[1],
-  ", ",
-  hipotese2_intervalo_confianca[2],
-  ")",
-  "\n",
-  "[Hipótese 2] Média: ",
-  round(mean(hipotese2_satisfacao$Resposta), digits=2),
-  "\n",
-  "[Hipótese 2] Margem de erro: ",
-  hipotese2_margem_erro,
-  "\n",
-  "[Hipótese 2] Teste de hipótese - Valor p: ",
-  hipotese2_teste$p.value,
-  "\n",
-  "[Hipótese 2] Teste de hipótese - Signficância: ",
-  alpha,
-  "\n",
-  "[Hipótese 2] Teste de hipótese - Resultado: ",
-  if (hipotese2_teste$p.value >= alpha) {
-    "H0 não rejeitada"
-  } else {
-    "H0 rejeitada"
-  },
-  sep=""))
 
 # ______________________________________________________________________________
 
@@ -263,13 +199,12 @@ hipotese3_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
 )
 
 ## Intervalo de confiança
-hipotese3_intervalo_confianca <- calcular_ic_likert(
+hipotese3_media <- round(mean(hipotese3_cargos$Resposta), digits=2)
+
+hipotese3_ic <- calcular_ic_likert(
   hipotese3_cargos$Resposta
 )
-hipotese3_margem_erro <- round((
-  hipotese3_intervalo_confianca[2]
-  - hipotese3_intervalo_confianca[1]
-) / 2, digits=2)
+hipotese3_margem_erro <- round(hipotese3_media - hipotese3_ic[1], digits=2)
 
 ## Teste de hipótese
 hipotese3_teste <- t.test(
@@ -278,37 +213,6 @@ hipotese3_teste <- t.test(
   conf.level=confianca,
   alternative="greater"
 )
-hipotese3_teste
-
-writeLines(paste(
-  "[Hipótese 3] Tamanho mínimo da amostra: ",
-  hipotese3_tamanho_minimo_amostra,
-  "\n",
-  "[Hipótese 3] Intervalo de confiança: (",
-  hipotese3_intervalo_confianca[1],
-  ", ",
-  hipotese3_intervalo_confianca[2],
-  ")",
-  "\n",
-  "[Hipótese 3] Média: ",
-  round(mean(hipotese3_cargos$Resposta), digits=2),
-  "\n",
-  "[Hipótese 3] Margem de erro: ",
-  hipotese3_margem_erro,
-  "\n",
-  "[Hipótese 3] Teste de hipótese - Valor p: ",
-  hipotese3_teste$p.value,
-  "\n",
-  "[Hipótese 3] Teste de hipótese - Signficância: ",
-  alpha,
-  "\n",
-  "[Hipótese 3] Teste de hipótese - Resultado: ",
-  if (hipotese3_teste$p.value >= alpha) {
-    "H0 não rejeitada"
-  } else {
-    "H0 rejeitada"
-  },
-  sep=""))
 
 # ______________________________________________________________________________
 
@@ -324,13 +228,13 @@ hipotese4_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
 )
 
 ## Intervalo de confiança
-hipotese4_intervalo_confianca <- calcular_ic_likert(
+hipotese4_media <- round(mean(hipotese4_futuro$Resposta), digits=2)
+
+hipotese4_ic <- calcular_ic_likert(
   hipotese4_futuro$Resposta
 )
-hipotese4_margem_erro <- round((
-  hipotese4_intervalo_confianca[2]
-  - hipotese4_intervalo_confianca[1]
-) / 2, digits=2)
+
+hipotese4_margem_erro <- round(hipotese4_media - hipotese4_ic[1], digits=2)
 
 ## Teste de hipótese
 hipotese4_teste <- t.test(
@@ -339,6 +243,108 @@ hipotese4_teste <- t.test(
   conf.level=confianca,
   alternative="greater"
 )
+
+# ______________________________________________________________________________
+
+# Resultados gerais
+
+
+hipotese1_teste
+
+writeLines(paste(
+  "[Hipótese 1] Tamanho mínimo da amostra: ",
+  hipotese1_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 1] Intervalo de confiança: (",
+  hipotese1_ic[1],
+  ", ",
+  hipotese1_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 1] Média: ",
+  hipotese1_media,
+  "\n",
+  "[Hipótese 1] Margem de erro: ",
+  hipotese1_margem_erro,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Valor p: ",
+  hipotese1_teste$p.value,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Resultado: ",
+  if (hipotese1_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+hipotese2_teste
+
+writeLines(paste(
+  "[Hipótese 2] Tamanho mínimo da amostra: ",
+  hipotese2_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 2] Intervalo de confiança: (",
+  hipotese2_ic[1],
+  ", ",
+  hipotese2_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 2] Média: ",
+  hipotese2_media,
+  "\n",
+  "[Hipótese 2] Margem de erro: ",
+  hipotese2_margem_erro,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Valor p: ",
+  hipotese2_teste$p.value,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Resultado: ",
+  if (hipotese2_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+hipotese3_teste
+
+writeLines(paste(
+  "[Hipótese 3] Tamanho mínimo da amostra: ",
+  hipotese3_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 3] Intervalo de confiança: (",
+  hipotese3_ic[1],
+  ", ",
+  hipotese3_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 3] Média: ",
+  hipotese3_media,
+  "\n",
+  "[Hipótese 3] Margem de erro: ",
+  hipotese3_margem_erro,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Valor p: ",
+  hipotese3_teste$p.value,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Resultado: ",
+  if (hipotese3_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
 hipotese4_teste
 
 writeLines(paste(
@@ -346,13 +352,13 @@ writeLines(paste(
   hipotese4_tamanho_minimo_amostra,
   "\n",
   "[Hipótese 4] Intervalo de confiança: (",
-  hipotese4_intervalo_confianca[1],
+  hipotese4_ic[1],
   ", ",
-  hipotese4_intervalo_confianca[2],
+  hipotese4_ic[2],
   ")",
   "\n",
   "[Hipótese 4] Média: ",
-  round(mean(hipotese4_futuro$Resposta), digits=2),
+  hipotese4_media,
   "\n",
   "[Hipótese 4] Margem de erro: ",
   hipotese4_margem_erro,
@@ -360,7 +366,7 @@ writeLines(paste(
   "[Hipótese 4] Teste de hipótese - Valor p: ",
   hipotese4_teste$p.value,
   "\n",
-  "[Hipótese 4] Teste de hipótese - Signficância: ",
+  "[Hipótese 4] Teste de hipótese - Significância: ",
   alpha,
   "\n",
   "[Hipótese 4] Teste de hipótese - Resultado: ",
@@ -370,3 +376,15 @@ writeLines(paste(
     "H0 rejeitada"
   },
   sep=""))
+
+ic_resumo <- data.frame(
+  variavel = c("Produtividade", "Satisfação", "Cargos", "Futuro"),
+  valor = c(hipotese1_media, hipotese2_media, hipotese3_media, hipotese4_media),
+  ic_inferior = c(hipotese1_ic[1], hipotese2_ic[1], hipotese3_ic[1], hipotese4_ic[1]),
+  ic_superior = c(hipotese1_ic[2], hipotese2_ic[2], hipotese3_ic[2], hipotese4_ic[2])
+)
+
+ggplot(ic_resumo, aes(x = variavel,y = valor, fill = variavel)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = ic_inferior, ymax = ic_superior), width = 0.4, color = "black") +
+  labs(title = "Intervalos de confiança", x = "Variável", y = "Valor", fill = "Variável")
