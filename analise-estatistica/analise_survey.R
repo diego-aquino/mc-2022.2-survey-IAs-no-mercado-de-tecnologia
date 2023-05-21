@@ -94,7 +94,7 @@ tabela <- matrix(c(mean(hipotese1_produtividade$Resposta), median(hipotese1_prod
                    mean(hipotese3_cargos$Resposta), median(hipotese3_cargos$Resposta), sd(hipotese3_cargos$Resposta),
                    mean(hipotese4_futuro$Resposta), median(hipotese4_futuro$Resposta), sd(hipotese4_futuro$Resposta)), ncol=3, byrow=TRUE)
 colnames(tabela) <- c('Média','Mediana','Desvio padrão')
-rownames(tabela) <- c('Hipótese 1 - produtividade','Hipótese 2 - satisfação','Hipótese 3 - cargos','Hipótese 4 - futuro')
+rownames(tabela) <- c('Hipótese 1 - Produtividade','Hipótese 2 - Satisfação','Hipótese 3 - Cargos','Hipótese 4 - Futuro')
 tabela <- as.table(tabela)
 tabela
 
@@ -132,7 +132,7 @@ calcular_ic_likert <- function(respostas) {
 # Hipótese 1: Impacto positivo na produtividade profissional
 
 ## Erro máximo tolerável para a variável "Impacto na produtividade profissional"
-hipotese1_erro <- 0.2
+hipotese1_erro <- 0.25
 
 ## Tamanho mínimo da amostra
 hipotese1_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
@@ -161,7 +161,7 @@ hipotese1_teste <- t.test(
 # Hipótese 2: Impacto positivo na satisfação profissional
 
 ## Erro máximo tolerável para a variável "Impacto na satisfação profissional"
-hipotese2_erro <- 0.2
+hipotese2_erro <- 0.25
 
 ## Tamanho mínimo da amostra
 hipotese2_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
@@ -190,7 +190,7 @@ hipotese2_teste <- t.test(
 # Hipótese 3: Sentimento com relação mudanças nos cargos
 
 ## Erro máximo tolerável para a variável "Sentimento com relação mudanças nos cargos"
-hipotese3_erro <- 0.2
+hipotese3_erro <- 0.25
 
 ## Tamanho mínimo da amostra
 hipotese3_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
@@ -219,7 +219,7 @@ hipotese3_teste <- t.test(
 # Hipótese 4: Sentimento com relação ao futuro das ferramentas
 
 ## Erro máximo tolerável para a variável "Sentimento com relação ao futuro das ferramentas"
-hipotese4_erro <- 0.2
+hipotese4_erro <- 0.25
 
 ## Tamanho mínimo da amostra
 hipotese4_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
@@ -247,7 +247,6 @@ hipotese4_teste <- t.test(
 # ______________________________________________________________________________
 
 # Resultados gerais
-
 
 hipotese1_teste
 
@@ -378,13 +377,17 @@ writeLines(paste(
   sep=""))
 
 ic_resumo <- data.frame(
-  variavel = c("Produtividade", "Satisfação", "Cargos", "Futuro"),
+  variavel = c("1. Produtividade", "2. Satisfação", "3. Cargos", "4. Futuro"),
   valor = c(hipotese1_media, hipotese2_media, hipotese3_media, hipotese4_media),
   ic_inferior = c(hipotese1_ic[1], hipotese2_ic[1], hipotese3_ic[1], hipotese4_ic[1]),
   ic_superior = c(hipotese1_ic[2], hipotese2_ic[2], hipotese3_ic[2], hipotese4_ic[2])
 )
 
-ggplot(ic_resumo, aes(x = variavel,y = valor, fill = variavel)) +
+ggplot(ic_resumo, aes(x = variavel, y = valor, fill = variavel)) +
   geom_bar(stat = "identity") +
   geom_errorbar(aes(ymin = ic_inferior, ymax = ic_superior), width = 0.4, color = "black") +
+  geom_text(aes(label = valor), vjust = -0.5, hjust = -0.25) +
+  geom_text(aes(label = ic_inferior, y = ic_inferior), vjust = 1.5) +
+  geom_text(aes(label = ic_superior, y = ic_superior), vjust = -0.5) +
+  coord_cartesian(ylim = c(0, max(ic_resumo$valor) * 1.3)) +
   labs(title = "Intervalos de confiança", x = "Variável", y = "Valor", fill = "Variável")
