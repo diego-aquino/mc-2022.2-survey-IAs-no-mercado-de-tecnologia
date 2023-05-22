@@ -2,6 +2,9 @@
 if (!require('tidyverse'))
   install.packages('tidyverse')
 library('tidyverse')
+if (!require('gridExtra'))
+  install.packages('gridExtra')
+library(gridExtra)
 
 library('ggplot2')
 
@@ -100,6 +103,34 @@ tabela
 
 # Gerando gráficos de barras
 # ...
+
+#par(mfrow=c(2,2))
+
+hipotese1_produtividade_freq <- as.data.frame(table(hipotese1_produtividade$Resposta))
+
+hipotese1_produtividade_plot <- ggplot(hipotese1_produtividade_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Respostas", y = "Quantidade", title = "Distribuição de respostas: hipótese 1")
+
+hipotese2_satisfacao_freq <- as.data.frame(table(hipotese2_satisfacao$Resposta))
+
+hipotese2_satisfacao_plot <- ggplot(hipotese2_satisfacao_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Respostas", y = "Quantidade", title = "Distribuição de respostas: hipótese 2")
+
+hipotese3_cargos_freq <- as.data.frame(table(hipotese3_cargos$Resposta))
+
+hipotese3_cargos_plot <- ggplot(hipotese3_cargos_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Respostas", y = "Quantidade", title = "Distribuição de respostas: hipótese 3")
+
+hipotese4_futuro_freq <- as.data.frame(table(hipotese4_futuro$Resposta))
+
+hipotese4_futuro_plot <- ggplot(hipotese4_futuro_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Respostas", y = "Quantidade", title = "Distribuição de respostas: hipótese 4")
+
+grid.arrange(hipotese1_produtividade_plot, hipotese2_satisfacao_plot, hipotese3_cargos_plot, hipotese4_futuro_plot, nrow = 2, ncol = 2)
 
 # ______________________________________________________________________________
 
