@@ -1,9 +1,12 @@
 # Importando as bibliotecas
-install.packages('tidyverse')
+if (!require('tidyverse'))
+  install.packages('tidyverse')
 library('tidyverse')
 
+library('ggplot2')
+
 # Importando o dataset
-respostas <- read.csv('respostas_formulario.csv')
+respostas <- read.csv(paste(getwd(), 'questionario-final/respostas.csv', sep='/'))
 head(respostas)
 summary(respostas)
 
@@ -13,7 +16,7 @@ summary(respostas)
 # Criando 5 dataframes diferentes: 1 com as respostas da caracterização da amostra e 1 para as
 # respostas das 4 hipóteses
 
-caracterizacao_amostra <- select(respostas, Quais.são.as.suas.áreas.de.atuação., 
+caracterizacao_amostra <- select(respostas, Quais.são.as.suas.áreas.de.atuação.,
                                  Quanto.tempo.de.experiência.profissional.você.possui.na.área.de.tecnologia.,
                                  Você.utiliza.ferramentas.de.IAs.conversacionais.e.de.geração.de.código.profissionalmente.,
                                  Para.quais.propósitos.você.utiliza.IAs.conversacionais.e.de.geração.de.código.profissionalmente.,
@@ -86,13 +89,305 @@ hipotese4_futuro <- transform(hipotese4_futuro, Resposta = as.numeric(Resposta))
 
 # Comparando média, mediana e desvio padrao
 
-tabela <- matrix(c(mean(hipotese1_produtividade$Resposta), median(hipotese1_produtividade$Resposta), sd(hipotese1_produtividade$Resposta), 
+tabela <- matrix(c(mean(hipotese1_produtividade$Resposta), median(hipotese1_produtividade$Resposta), sd(hipotese1_produtividade$Resposta),
                    mean(hipotese2_satisfacao$Resposta), median(hipotese2_satisfacao$Resposta), sd(hipotese2_satisfacao$Resposta),
-                   mean(hipotese3_cargos$Resposta), median(hipotese3_cargos$Resposta), sd(hipotese3_cargos$Resposta), 
+                   mean(hipotese3_cargos$Resposta), median(hipotese3_cargos$Resposta), sd(hipotese3_cargos$Resposta),
                    mean(hipotese4_futuro$Resposta), median(hipotese4_futuro$Resposta), sd(hipotese4_futuro$Resposta)), ncol=3, byrow=TRUE)
 colnames(tabela) <- c('Média','Mediana','Desvio padrão')
-rownames(tabela) <- c('Hipótese 1 - produtividade','Hipótese 2 - satisfação','Hipótese 3 - cargos','Hipótese 4 - futuro')
+rownames(tabela) <- c('Hipótese 1 - Produtividade','Hipótese 2 - Satisfação','Hipótese 3 - Cargos','Hipótese 4 - Futuro')
 tabela <- as.table(tabela)
 tabela
 
 # Gerando gráficos de barras
+# ...
+
+# ______________________________________________________________________________
+
+# Recursos gerais para os testes de hipótese
+confianca <- 0.95 # Confiança do teste
+alpha <- 0.05 # Probabilidade do Erro Tipo 1
+
+z <- qnorm(confianca + (1 - confianca) / 2)
+
+calcular_tamanho_minimo_amostra <- function(respostas, erro) {
+  desvio_padrao <- sd(respostas)
+  tamanho_minimo <- ceiling((z * desvio_padrao / erro) ** 2)
+  tamanho_minimo
+}
+
+calcular_ic_likert <- function(respostas) {
+  media <- mean(respostas)
+  desvio_padrao <- sd(respostas)
+  margem_erro <- z * desvio_padrao / (length(hipotese1_produtividade) ** 0.5)
+
+  intervalo_confianca <- c(
+    round(max(media - margem_erro, 1), digits=2),
+    round(min(media + margem_erro, 5), digits=2)
+  )
+  intervalo_confianca
+}
+
+# ______________________________________________________________________________
+
+# Hipótese 1: Impacto positivo na produtividade profissional
+
+## Erro máximo tolerável para a variável "Impacto na produtividade profissional"
+hipotese1_erro <- 0.25
+
+## Tamanho mínimo da amostra
+hipotese1_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
+  hipotese1_produtividade$Resposta,
+  hipotese1_erro
+)
+
+## Intervalo de confiança
+hipotese1_media <- round(mean(hipotese1_produtividade$Resposta), digits=2)
+
+hipotese1_ic <- calcular_ic_likert(
+  hipotese1_produtividade$Resposta
+)
+hipotese1_margem_erro <- round(hipotese1_media - hipotese1_ic[1], digits=2)
+
+## Teste de hipótese
+hipotese1_teste <- t.test(
+  hipotese1_produtividade$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+
+# ______________________________________________________________________________
+
+# Hipótese 2: Impacto positivo na satisfação profissional
+
+## Erro máximo tolerável para a variável "Impacto na satisfação profissional"
+hipotese2_erro <- 0.25
+
+## Tamanho mínimo da amostra
+hipotese2_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
+  hipotese2_satisfacao$Resposta,
+  hipotese2_erro
+)
+
+## Intervalo de confiança
+hipotese2_media <- round(mean(hipotese2_satisfacao$Resposta), digits=2)
+
+hipotese2_ic <- calcular_ic_likert(
+  hipotese2_satisfacao$Resposta
+)
+hipotese2_margem_erro <- round(hipotese2_media - hipotese2_ic[1], digits=2)
+
+## Teste de hipótese
+hipotese2_teste <- t.test(
+  hipotese2_satisfacao$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+
+# ______________________________________________________________________________
+
+# Hipótese 3: Sentimento com relação mudanças nos cargos
+
+## Erro máximo tolerável para a variável "Sentimento com relação mudanças nos cargos"
+hipotese3_erro <- 0.25
+
+## Tamanho mínimo da amostra
+hipotese3_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
+  hipotese3_cargos$Resposta,
+  hipotese3_erro
+)
+
+## Intervalo de confiança
+hipotese3_media <- round(mean(hipotese3_cargos$Resposta), digits=2)
+
+hipotese3_ic <- calcular_ic_likert(
+  hipotese3_cargos$Resposta
+)
+hipotese3_margem_erro <- round(hipotese3_media - hipotese3_ic[1], digits=2)
+
+## Teste de hipótese
+hipotese3_teste <- t.test(
+  hipotese3_cargos$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+
+# ______________________________________________________________________________
+
+# Hipótese 4: Sentimento com relação ao futuro das ferramentas
+
+## Erro máximo tolerável para a variável "Sentimento com relação ao futuro das ferramentas"
+hipotese4_erro <- 0.25
+
+## Tamanho mínimo da amostra
+hipotese4_tamanho_minimo_amostra <- calcular_tamanho_minimo_amostra(
+  hipotese4_futuro$Resposta,
+  hipotese4_erro
+)
+
+## Intervalo de confiança
+hipotese4_media <- round(mean(hipotese4_futuro$Resposta), digits=2)
+
+hipotese4_ic <- calcular_ic_likert(
+  hipotese4_futuro$Resposta
+)
+
+hipotese4_margem_erro <- round(hipotese4_media - hipotese4_ic[1], digits=2)
+
+## Teste de hipótese
+hipotese4_teste <- t.test(
+  hipotese4_futuro$Resposta,
+  mu=3,
+  conf.level=confianca,
+  alternative="greater"
+)
+
+# ______________________________________________________________________________
+
+# Resultados gerais
+
+hipotese1_teste
+
+writeLines(paste(
+  "[Hipótese 1] Tamanho mínimo da amostra: ",
+  hipotese1_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 1] Intervalo de confiança: (",
+  hipotese1_ic[1],
+  ", ",
+  hipotese1_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 1] Média: ",
+  hipotese1_media,
+  "\n",
+  "[Hipótese 1] Margem de erro: ",
+  hipotese1_margem_erro,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Valor p: ",
+  hipotese1_teste$p.value,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 1] Teste de hipótese - Resultado: ",
+  if (hipotese1_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+hipotese2_teste
+
+writeLines(paste(
+  "[Hipótese 2] Tamanho mínimo da amostra: ",
+  hipotese2_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 2] Intervalo de confiança: (",
+  hipotese2_ic[1],
+  ", ",
+  hipotese2_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 2] Média: ",
+  hipotese2_media,
+  "\n",
+  "[Hipótese 2] Margem de erro: ",
+  hipotese2_margem_erro,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Valor p: ",
+  hipotese2_teste$p.value,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 2] Teste de hipótese - Resultado: ",
+  if (hipotese2_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+hipotese3_teste
+
+writeLines(paste(
+  "[Hipótese 3] Tamanho mínimo da amostra: ",
+  hipotese3_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 3] Intervalo de confiança: (",
+  hipotese3_ic[1],
+  ", ",
+  hipotese3_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 3] Média: ",
+  hipotese3_media,
+  "\n",
+  "[Hipótese 3] Margem de erro: ",
+  hipotese3_margem_erro,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Valor p: ",
+  hipotese3_teste$p.value,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 3] Teste de hipótese - Resultado: ",
+  if (hipotese3_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+hipotese4_teste
+
+writeLines(paste(
+  "[Hipótese 4] Tamanho mínimo da amostra: ",
+  hipotese4_tamanho_minimo_amostra,
+  "\n",
+  "[Hipótese 4] Intervalo de confiança: (",
+  hipotese4_ic[1],
+  ", ",
+  hipotese4_ic[2],
+  ")",
+  "\n",
+  "[Hipótese 4] Média: ",
+  hipotese4_media,
+  "\n",
+  "[Hipótese 4] Margem de erro: ",
+  hipotese4_margem_erro,
+  "\n",
+  "[Hipótese 4] Teste de hipótese - Valor p: ",
+  hipotese4_teste$p.value,
+  "\n",
+  "[Hipótese 4] Teste de hipótese - Significância: ",
+  alpha,
+  "\n",
+  "[Hipótese 4] Teste de hipótese - Resultado: ",
+  if (hipotese4_teste$p.value >= alpha) {
+    "H0 não rejeitada"
+  } else {
+    "H0 rejeitada"
+  },
+  sep=""))
+
+ic_resumo <- data.frame(
+  variavel = c("1. Produtividade", "2. Satisfação", "3. Cargos", "4. Futuro"),
+  valor = c(hipotese1_media, hipotese2_media, hipotese3_media, hipotese4_media),
+  ic_inferior = c(hipotese1_ic[1], hipotese2_ic[1], hipotese3_ic[1], hipotese4_ic[1]),
+  ic_superior = c(hipotese1_ic[2], hipotese2_ic[2], hipotese3_ic[2], hipotese4_ic[2])
+)
+
+ggplot(ic_resumo, aes(x = variavel, y = valor, fill = variavel)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = ic_inferior, ymax = ic_superior), width = 0.4, color = "black") +
+  geom_text(aes(label = valor), vjust = -0.5, hjust = -0.25) +
+  geom_text(aes(label = ic_inferior, y = ic_inferior), vjust = 1.5) +
+  geom_text(aes(label = ic_superior, y = ic_superior), vjust = -0.5) +
+  coord_cartesian(ylim = c(0, max(ic_resumo$valor) * 1.3)) +
+  labs(title = "Intervalos de confiança", x = "Variável", y = "Valor", fill = "Variável")
