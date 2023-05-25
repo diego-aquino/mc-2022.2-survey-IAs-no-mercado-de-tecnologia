@@ -13,8 +13,20 @@ respostas <- read.csv(paste(getwd(), 'questionario-final/respostas.csv', sep='/'
 head(respostas)
 summary(respostas)
 
-# Retirando respostas inválidas: marcou que utiliza as ferramentas de código (pergunta 6 = 'sim'),
-# mas não selecionou ou escreveu nenhuma ferramenta (perguntas 7-11)
+# Retirando respostas inválidas:
+
+# Apenas quem aceita o termo de consentimento e quem trabalha ou estuda na área de tecnologia
+
+respostas <- subset(respostas, respostas[2] == 'Aceito participar' & respostas[3] == 'Sim')
+
+# Retirando respostas em que o participante diz que usa as ferramentas, mas
+# não indica nenhuma
+
+# PERGUNTAR AO PROFESSOR
+
+respostas <- subset(respostas, (respostas[6] == 'Não') | (respostas[6] == 'Sim' & 
+            (respostas[8] != 'Nunca utilizei' | respostas[9] != 'Nunca utilizei' | respostas[10] != 'Nunca utilizei' | respostas[11] != 'Nunca utilizei' | respostas[12] != "")))
+
 
 # Criando 5 dataframes diferentes: 1 com as respostas da caracterização da amostra e 1 para as
 # respostas das 4 hipóteses
@@ -38,6 +50,42 @@ hipotese2_satisfacao <- select(respostas, Complete.a.seguinte.frase.de.acordo.co
 hipotese3_cargos <- select(respostas, Qual.o.seu.sentimento.com.relação.a.modificações..em.razão.de.IAs..nos.cargos.da.área.da.tecnologia.)
 hipotese4_futuro <- select(respostas, Qual.o.seu.sentimento.sobre.o.futuro.das.ferramentas.de.IA.conversacionais.e.de.geração.de.código.)
 
+# Análise contextual
+
+# Renomeando as colunas
+colnames(caracterizacao_amostra)[1] = "Áreas de atuação"
+colnames(caracterizacao_amostra)[2] = "Tempo de experiência"
+colnames(caracterizacao_amostra)[3] = "Utiliza ferramentas de IA"
+colnames(caracterizacao_amostra)[4] = "Propositos ferramentas"
+colnames(caracterizacao_amostra)[5] = "Tempo de uso ChatGPT"
+colnames(caracterizacao_amostra)[6] = "Tempo de uso Bing Chat"
+colnames(caracterizacao_amostra)[7] = "Tempo de uso Github Copilot"
+colnames(caracterizacao_amostra)[8] = "Tempo de uso Tabnine"
+colnames(caracterizacao_amostra)[9] = "Tempo de uso outros"
+colnames(caracterizacao_amostra)[10] = "Frequência ChatGPT"
+colnames(caracterizacao_amostra)[11] = "Frequência Bing Chat"
+colnames(caracterizacao_amostra)[12] = "Frequência Github Copilot"
+colnames(caracterizacao_amostra)[13] = "Frequência Tabnine"
+colnames(caracterizacao_amostra)[14] = "Frequência outros"
+
+head(caracterizacao_amostra)
+
+utiliza_ferramentas_freq <- as.data.frame(table(caracterizacao_amostra$`Utiliza ferramentas de IA`))
+
+utiliza_ferramentas_plot <- ggplot(utiliza_ferramentas_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "", y = "Quantidade", title = "Distribuição de respostas: utliza ferramentas de IA")
+
+utiliza_ferramentas_plot
+
+tempo_experiencia_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de experiência`))
+
+tempo_experiencia_plot <- ggplot(tempo_experiencia_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Tempo", y = "Quantidade", title = "Distribuição de respostas: tempo de experiência")
+
+tempo_experiencia_plot
+
 # Renomeando as colunas
 
 colnames(hipotese1_produtividade)[1] = "Resposta"
@@ -45,13 +93,11 @@ colnames(hipotese2_satisfacao)[1] = "Resposta"
 colnames(hipotese3_cargos)[1] = "Resposta"
 colnames(hipotese4_futuro)[1] = "Resposta"
 
-
-# Retirando respostas vazias
+# Retirando respostas vazias das 2 primeiras hipóteses
+# (apenas os participantes que usam as ferramentas respondem essas questões)
 
 hipotese1_produtividade <- subset(hipotese1_produtividade,  Resposta != "")
 hipotese2_satisfacao <- subset(hipotese2_satisfacao, Resposta != "")
-hipotese3_cargos <- subset(hipotese3_cargos, Resposta != "")
-hipotese4_futuro <- subset(hipotese4_futuro, Resposta != "")
 
 # Transformando as respostas da escala Linkert para uma escala numérica de 1 a 5, de modo
 # a facilitar a análise dos dados
