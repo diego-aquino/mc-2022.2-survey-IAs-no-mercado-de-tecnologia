@@ -2,16 +2,30 @@
 if (!require('tidyverse'))
   install.packages('tidyverse')
 library('tidyverse')
+if (!require('gridExtra'))
+  install.packages('gridExtra')
+library(gridExtra)
+library(forcats)
 
 library('ggplot2')
 
 # Importando o dataset
 respostas <- read.csv(paste(getwd(), 'questionario-final/respostas.csv', sep='/'))
-head(respostas)
-summary(respostas)
 
-# Retirando respostas inválidas: marcou que utiliza as ferramentas de código (pergunta 6 = 'sim'),
-# mas não selecionou ou escreveu nenhuma ferramenta (perguntas 7-11)
+# ______________________________________________________________________________
+
+# Retirando respostas inválidas:
+
+# Apenas quem aceita o termo de consentimento e quem trabalha ou estuda na área de tecnologia
+
+respostas <- subset(respostas, respostas[2] == 'Aceito participar' & respostas[3] == 'Sim')
+
+# Retirando respostas em que o participante diz que usa as ferramentas, mas
+# não indica nenhuma
+
+respostas <- subset(respostas, (respostas[6] == 'Não') | (respostas[6] == 'Sim' & 
+            (respostas[8] != 'Nunca utilizei' | respostas[9] != 'Nunca utilizei' | respostas[10] != 'Nunca utilizei' | respostas[11] != 'Nunca utilizei' | respostas[12] != "")))
+
 
 # Criando 5 dataframes diferentes: 1 com as respostas da caracterização da amostra e 1 para as
 # respostas das 4 hipóteses
@@ -35,6 +49,281 @@ hipotese2_satisfacao <- select(respostas, Complete.a.seguinte.frase.de.acordo.co
 hipotese3_cargos <- select(respostas, Qual.o.seu.sentimento.com.relação.a.modificações..em.razão.de.IAs..nos.cargos.da.área.da.tecnologia.)
 hipotese4_futuro <- select(respostas, Qual.o.seu.sentimento.sobre.o.futuro.das.ferramentas.de.IA.conversacionais.e.de.geração.de.código.)
 
+# ______________________________________________________________________________
+
+# Análise contextual
+
+# Renomeando as colunas
+colnames(caracterizacao_amostra)[1] = "Áreas de atuação"
+colnames(caracterizacao_amostra)[2] = "Tempo de experiência"
+colnames(caracterizacao_amostra)[3] = "Utiliza ferramentas de IA"
+colnames(caracterizacao_amostra)[4] = "Propositos ferramentas"
+colnames(caracterizacao_amostra)[5] = "Tempo de uso ChatGPT"
+colnames(caracterizacao_amostra)[6] = "Tempo de uso Bing Chat"
+colnames(caracterizacao_amostra)[7] = "Tempo de uso Github Copilot"
+colnames(caracterizacao_amostra)[8] = "Tempo de uso Tabnine"
+colnames(caracterizacao_amostra)[9] = "Tempo de uso outros"
+colnames(caracterizacao_amostra)[10] = "Frequência ChatGPT"
+colnames(caracterizacao_amostra)[11] = "Frequência Bing Chat"
+colnames(caracterizacao_amostra)[12] = "Frequência Github Copilot"
+colnames(caracterizacao_amostra)[13] = "Frequência Tabnine"
+colnames(caracterizacao_amostra)[14] = "Frequência outros"
+
+# ______________________________________________________________________________
+
+# Tempo de experiência
+tempo_experiencia_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de experiência`))
+
+tempo_experiencia_freq <- tempo_experiencia_freq %>% 
+  add_row(Var1 = "Entre 6 e 8 anos", Freq=0,)
+
+rows_order <- c("Menos que 2 anos", "Entre 2 e 4 anos", 
+                "Entre 4 e 6 anos", "Entre 6 e 8 anos",
+                "Mais que 8 anos")
+
+tempo_experiencia_freq <- tempo_experiencia_freq %>%
+  slice(match(rows_order, Var1))
+
+tempo_experiencia_freq$Freq <- round(((tempo_experiencia_freq$Freq / sum(tempo_experiencia_freq$Freq)) * 100), 1)
+
+tempo_experiencia_freq %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Tempo de experiência")
+
+# ______________________________________________________________________________
+
+# Áreas de atuação
+
+areas_names <- c("Gerência de Projetos", "Desenvolvimento de Software", "Infraestrutura e DevOps",
+          "Inteligência artificial", "Ciência de Dados", 
+          "Ensino e aprendizado")
+
+areas_count <- c(0, 0, 0, 0, 0, 0)
+
+for (r in caracterizacao_amostra$`Áreas de atuação`) {
+  split_r <- strsplit(r, ", ")
+  for (r1 in split_r[[1]]) {
+    if (r1 == "Gerência de Projetos") {
+      areas_count[1] <- areas_count[1] + 1
+    } else if (r1 == "Desenvolvimento de Software") {
+      areas_count[2] <- areas_count[2] + 1
+    } else if (r1 == "Infraestrutura e DevOps") {
+      areas_count[3] <- areas_count[3] + 1
+    } else if (r1 == "Inteligência Artificial") {
+      areas_count[4] <- areas_count[4] + 1
+    } else if (r1 == "Ciência de Dados") {
+      areas_count[5] <- areas_count[5] + 1
+    } else if (r1 == "Ensino e aprendizado (professor(a)") {
+      areas_count[6] <- areas_count[6] + 1
+    }
+  }
+}
+
+areas_freq <- data.frame(Var1 = areas_names, Freq = areas_count)
+
+areas_freq$Freq <- round(((areas_freq$Freq / nrow(caracterizacao_amostra)) * 100), 1)
+
+ggplot(areas_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Áreas de atuação")
+
+
+# ______________________________________________________________________________
+
+# Utiliza ferramentas
+utiliza_ferramentas_freq <- as.data.frame(table(caracterizacao_amostra$`Utiliza ferramentas de IA`))
+
+utiliza_ferramentas_freq$Freq <- round(((utiliza_ferramentas_freq$Freq / sum(utiliza_ferramentas_freq$Freq)) * 100), 1)
+
+ggplot(utiliza_ferramentas_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Utiliza ferramentas de IA")
+
+# ______________________________________________________________________________
+
+# Propositos de uso
+
+propositos_names <- c("Aprendizado de novos assuntos", "Auxílio na escrita de código", 
+                      "Auxílio na escrita de testes", "Auxílio na escrita de textos", 
+                      "Debugging e investigação de problemas", "Resolução de dúvidas")
+
+propositos_count <- c(0, 0, 0, 0, 0, 0)
+
+for (r in caracterizacao_amostra$`Propositos ferramentas`) {
+  split_r <- strsplit(r, ", ")
+  for (r1 in split_r[[1]]) {
+    if (r1 == "Aprendizado de novos assuntos e tecnologias") {
+      propositos_count[1] <- propositos_count[1] + 1
+    } else if (r1 == "Auxílio na escrita de código") {
+      propositos_count[2] <- propositos_count[2] + 1
+    } else if (r1 == "Auxílio na escrita de testes automáticos") {
+      propositos_count[3] <- propositos_count[3] + 1
+    } else if (r1 == "Auxílio na escrita de textos em linguagem natural") {
+      propositos_count[4] <- propositos_count[4] + 1
+    } else if (r1 == "Debugging e investigação de problemas") {
+      propositos_count[5] <- propositos_count[5] + 1
+    } else if (r1 == "Resolução de dúvidas") {
+      propositos_count[6] <- propositos_count[6] + 1
+    }
+  }
+}
+
+propositos_freq <- data.frame(Var1 = propositos_names, Freq = propositos_count)
+
+propositos_freq$Freq <- round(((propositos_freq$Freq / nrow(subset(caracterizacao_amostra, `Propositos ferramentas` != ""))) * 100), 1)
+
+ggplot(propositos_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Propósitos de uso das ferramentas")
+
+# ______________________________________________________________________________
+
+# Tempo de uso
+rows_order <- c("Nunca utilizei", "Menos de 1 ano", 
+                "Entre 1 e 2 anos", "Mais que 3 anos")
+
+tempo_uso_chat_gpt_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de uso ChatGPT`))
+tempo_uso_chat_gpt_freq <- subset(tempo_uso_chat_gpt_freq, Var1 != "")
+
+tempo_uso_chat_gpt_freq <- tempo_uso_chat_gpt_freq %>%
+  slice(match(rows_order, Var1))
+
+tempo_uso_chat_gpt_freq$Freq <- round(((tempo_uso_chat_gpt_freq$Freq / sum(tempo_uso_chat_gpt_freq$Freq)) * 100), 1)
+
+tempo_uso_chat_gpt_plot <- tempo_uso_chat_gpt_freq %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "", y = "%", title = "Tempo de uso - ChatGPT")
+
+tempo_uso_bing_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de uso Bing Chat`))
+tempo_uso_bing_freq <- subset(tempo_uso_bing_freq, Var1 != "")
+
+tempo_uso_bing_freq <- tempo_uso_bing_freq %>%
+  slice(match(rows_order, Var1))
+
+tempo_uso_bing_freq$Freq <- round(((tempo_uso_bing_freq$Freq / sum(tempo_uso_bing_freq$Freq)) * 100), 1)
+
+tempo_uso_bing_plot <- tempo_uso_bing_freq %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "", y = "%", title = "Tempo de uso - Bing Chat")
+
+tempo_uso_copilot_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de uso Github Copilot`))
+tempo_uso_copilot_freq <- subset(tempo_uso_copilot_freq, Var1 != "")
+
+tempo_uso_copilot_freq <- tempo_uso_copilot_freq %>%
+  slice(match(rows_order, Var1))
+
+tempo_uso_copilot_freq$Freq <- round(((tempo_uso_copilot_freq$Freq / sum(tempo_uso_copilot_freq$Freq)) * 100), 1)
+
+tempo_uso_copilot_plot <- tempo_uso_copilot_freq %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "", y = "%", title = "Tempo de uso - GitHub Copilot")
+
+tempo_uso_tabnine_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de uso Tabnine`))
+tempo_uso_tabnine_freq <- subset(tempo_uso_tabnine_freq, Var1 != "")
+
+tempo_uso_tabnine_freq <- tempo_uso_tabnine_freq %>%
+  slice(match(rows_order, Var1))
+
+tempo_uso_tabnine_freq$Freq <- round(((tempo_uso_tabnine_freq$Freq / sum(tempo_uso_tabnine_freq$Freq)) * 100), 1)
+
+tempo_uso_tabnine_plot <- tempo_uso_tabnine_freq %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "", y = "%", title = "Tempo de uso - Tabnine")
+
+grid.arrange(tempo_uso_chat_gpt_plot, tempo_uso_bing_plot, tempo_uso_copilot_plot, tempo_uso_tabnine_plot)
+
+# ______________________________________________________________________________
+
+# Frequência de uso
+
+rows_order <- c("Nunca utilizei", "Raramente", "Mensalmente",
+                "Semanalmente", "Diariamente")
+
+frequencia_chat_gpt <- as.data.frame(table(caracterizacao_amostra$`Frequência ChatGPT`))
+frequencia_chat_gpt <- subset(frequencia_chat_gpt, Var1 != "")
+
+frequencia_chat_gpt <- frequencia_chat_gpt %>%
+  slice(match(rows_order, Var1))
+
+frequencia_chat_gpt$Freq <- round(((frequencia_chat_gpt$Freq / sum(frequencia_chat_gpt$Freq)) * 100), 1)
+
+frequencia_chat_gpt_plot <- frequencia_chat_gpt %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "", y = "%", title = "Frequência - ChatGPT")
+
+frequencia_bing <- as.data.frame(table(caracterizacao_amostra$`Frequência Bing Chat`))
+frequencia_bing <- subset(frequencia_bing, Var1 != "")
+
+frequencia_bing <- frequencia_bing %>%
+  slice(match(rows_order, Var1))
+
+frequencia_bing$Freq <- round(((frequencia_bing$Freq / sum(frequencia_bing$Freq)) * 100), 1)
+
+frequencia_bing_plot <- frequencia_bing %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "Frequência", y = "Quantidade", title = "Frequência - Bing Chat")
+
+frequencia_copilot <- as.data.frame(table(caracterizacao_amostra$`Frequência Github Copilot`))
+frequencia_copilot <- subset(frequencia_copilot, Var1 != "")
+
+frequencia_copilot <- frequencia_copilot %>%
+  slice(match(rows_order, Var1))
+
+frequencia_copilot$Freq <- round(((frequencia_copilot$Freq / sum(frequencia_copilot$Freq)) * 100), 1)
+
+frequencia_copilot_plot <- frequencia_copilot %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "Frequência", y = "Quantidade", title = "Frequência - GitHub Copilot")
+
+frequencia_tabnine <- as.data.frame(table(caracterizacao_amostra$`Frequência Tabnine`))
+frequencia_tabnine <- subset(frequencia_tabnine, Var1 != "")
+
+frequencia_tabnine <- frequencia_tabnine %>%
+  slice(match(rows_order, Var1))
+
+frequencia_tabnine$Freq <- round(((frequencia_tabnine$Freq / sum(frequencia_tabnine$Freq)) * 100), 1)
+
+frequencia_tabnine_plot <- frequencia_tabnine %>%
+  mutate(Var1=factor(Var1, levels=Var1)) %>% 
+  ggplot(aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "Frequência", y = "Quantidade", title = "Frequência - Tabnine")
+
+grid.arrange(frequencia_chat_gpt_plot, frequencia_bing_plot, frequencia_copilot_plot, frequencia_tabnine_plot)
+
+
+# ______________________________________________________________________________
+
+# Análise exploratória
+
 # Renomeando as colunas
 
 colnames(hipotese1_produtividade)[1] = "Resposta"
@@ -42,13 +331,11 @@ colnames(hipotese2_satisfacao)[1] = "Resposta"
 colnames(hipotese3_cargos)[1] = "Resposta"
 colnames(hipotese4_futuro)[1] = "Resposta"
 
-
-# Retirando respostas vazias
+# Retirando respostas vazias das 2 primeiras hipóteses
+# (apenas os participantes que usam as ferramentas respondem essas questões)
 
 hipotese1_produtividade <- subset(hipotese1_produtividade,  Resposta != "")
 hipotese2_satisfacao <- subset(hipotese2_satisfacao, Resposta != "")
-hipotese3_cargos <- subset(hipotese3_cargos, Resposta != "")
-hipotese4_futuro <- subset(hipotese4_futuro, Resposta != "")
 
 # Transformando as respostas da escala Linkert para uma escala numérica de 1 a 5, de modo
 # a facilitar a análise dos dados
@@ -85,7 +372,7 @@ hipotese4_futuro["Resposta"][hipotese4_futuro["Resposta"] == "Totalmente pessimi
 
 hipotese4_futuro <- transform(hipotese4_futuro, Resposta = as.numeric(Resposta))
 
-# Análise exploratória
+# ______________________________________________________________________________
 
 # Comparando média, mediana e desvio padrao
 
@@ -98,8 +385,43 @@ rownames(tabela) <- c('Hipótese 1 - Produtividade','Hipótese 2 - Satisfação'
 tabela <- as.table(tabela)
 tabela
 
+# ______________________________________________________________________________
+
 # Gerando gráficos de barras
-# ...
+
+hipotese1_produtividade_freq <- as.data.frame(table(hipotese1_produtividade$Resposta))
+
+hipotese1_produtividade_freq$Freq <- round(((hipotese1_produtividade_freq$Freq / sum(hipotese1_produtividade_freq$Freq)) * 100), 1)
+
+hipotese1_produtividade_plot <- ggplot(hipotese1_produtividade_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "#f8766d") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 1: produtividade")
+
+hipotese2_satisfacao_freq <- as.data.frame(table(hipotese2_satisfacao$Resposta))
+
+hipotese2_satisfacao_freq$Freq <- round(((hipotese2_satisfacao_freq$Freq / sum(hipotese2_satisfacao_freq$Freq)) * 100), 1)
+
+hipotese2_satisfacao_plot <- ggplot(hipotese2_satisfacao_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "#7cae00") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 2: satisfação")
+
+hipotese3_cargos_freq <- as.data.frame(table(hipotese3_cargos$Resposta))
+
+hipotese3_cargos_freq$Freq <- round(((hipotese3_cargos_freq$Freq / sum(hipotese3_cargos_freq$Freq)) * 100), 1)
+
+hipotese3_cargos_plot <- ggplot(hipotese3_cargos_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "#00bfc4") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 3: cargos")
+
+hipotese4_futuro_freq <- as.data.frame(table(hipotese4_futuro$Resposta))
+
+hipotese4_futuro_freq$Freq <- round(((hipotese4_futuro_freq$Freq / sum(hipotese4_futuro_freq$Freq)) * 100), 1)
+
+hipotese4_futuro_plot <- ggplot(hipotese4_futuro_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "#c77cff") + theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 4: futuro")
+
+grid.arrange(hipotese1_produtividade_plot, hipotese2_satisfacao_plot, hipotese3_cargos_plot, hipotese4_futuro_plot, nrow = 2, ncol = 2)
 
 # ______________________________________________________________________________
 
@@ -384,10 +706,11 @@ ic_resumo <- data.frame(
 )
 
 ggplot(ic_resumo, aes(x = variavel, y = valor, fill = variavel)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity") + theme_minimal() +
   geom_errorbar(aes(ymin = ic_inferior, ymax = ic_superior), width = 0.4, color = "black") +
   geom_text(aes(label = valor), vjust = -0.5, hjust = -0.25) +
   geom_text(aes(label = ic_inferior, y = ic_inferior), vjust = 1.5) +
   geom_text(aes(label = ic_superior, y = ic_superior), vjust = -0.5) +
   coord_cartesian(ylim = c(0, max(ic_resumo$valor) * 1.3)) +
   labs(title = "Intervalos de confiança", x = "Variável", y = "Valor", fill = "Variável")
+
