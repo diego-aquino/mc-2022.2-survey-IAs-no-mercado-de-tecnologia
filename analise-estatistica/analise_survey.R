@@ -11,8 +11,6 @@ library('ggplot2')
 
 # Importando o dataset
 respostas <- read.csv(paste(getwd(), 'questionario-final/respostas.csv', sep='/'))
-head(respostas)
-summary(respostas)
 
 # ______________________________________________________________________________
 
@@ -73,28 +71,6 @@ colnames(caracterizacao_amostra)[14] = "Frequência outros"
 
 # ______________________________________________________________________________
 
-# Áreas de atuação
-
-#areas_names <- c("Gerência de Projetos", "Desenvolvimento de Software", "Infraestrutura e DevOps",
-#          "Inteligência artificial", "Ciência de Dados", 
-#          "Ensino e aprendizado (professor(a), monitor(a) ou estudante)")
-
-#areas_count <- c(0, 0, 0, 0, 0, 0)
-
-#for (r in caracterizacao_amostra$`Áreas de atuação`) {
-#  split_r <- strsplit(r, ",")
-#  for (r1 in split_r[[1]]) {
-#    print(r1)
-#  }
-  #if (r == "Gerência de Projetos") {
-  #  areas_count[1] = areas_count[1] + 1
-  #} else if (r == "Desenvolvimento de Software") {
-  #  areas_count
-  #}
-#}
-
-# ______________________________________________________________________________
-
 # Tempo de experiência
 tempo_experiencia_freq <- as.data.frame(table(caracterizacao_amostra$`Tempo de experiência`))
 
@@ -119,6 +95,45 @@ tempo_experiencia_freq %>%
 
 # ______________________________________________________________________________
 
+# Áreas de atuação
+
+areas_names <- c("Gerência de Projetos", "Desenvolvimento de Software", "Infraestrutura e DevOps",
+          "Inteligência artificial", "Ciência de Dados", 
+          "Ensino e aprendizado")
+
+areas_count <- c(0, 0, 0, 0, 0, 0)
+
+for (r in caracterizacao_amostra$`Áreas de atuação`) {
+  split_r <- strsplit(r, ", ")
+  for (r1 in split_r[[1]]) {
+    if (r1 == "Gerência de Projetos") {
+      areas_count[1] <- areas_count[1] + 1
+    } else if (r1 == "Desenvolvimento de Software") {
+      areas_count[2] <- areas_count[2] + 1
+    } else if (r1 == "Infraestrutura e DevOps") {
+      areas_count[3] <- areas_count[3] + 1
+    } else if (r1 == "Inteligência Artificial") {
+      areas_count[4] <- areas_count[4] + 1
+    } else if (r1 == "Ciência de Dados") {
+      areas_count[5] <- areas_count[5] + 1
+    } else if (r1 == "Ensino e aprendizado (professor(a)") {
+      areas_count[6] <- areas_count[6] + 1
+    }
+  }
+}
+
+areas_freq <- data.frame(Var1 = areas_names, Freq = areas_count)
+
+areas_freq$Freq <- round(((areas_freq$Freq / nrow(caracterizacao_amostra)) * 100), 1)
+
+ggplot(areas_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Áreas de atuação")
+
+
+# ______________________________________________________________________________
+
 # Utiliza ferramentas
 utiliza_ferramentas_freq <- as.data.frame(table(caracterizacao_amostra$`Utiliza ferramentas de IA`))
 
@@ -132,6 +147,40 @@ ggplot(utiliza_ferramentas_freq, aes(x = Var1, y = Freq)) +
 # ______________________________________________________________________________
 
 # Propositos de uso
+
+propositos_names <- c("Aprendizado de novos assuntos", "Auxílio na escrita de código", 
+                      "Auxílio na escrita de testes", "Auxílio na escrita de textos", 
+                      "Debugging e investigação de problemas", "Resolução de dúvidas")
+
+propositos_count <- c(0, 0, 0, 0, 0, 0)
+
+for (r in caracterizacao_amostra$`Propositos ferramentas`) {
+  split_r <- strsplit(r, ", ")
+  for (r1 in split_r[[1]]) {
+    if (r1 == "Aprendizado de novos assuntos e tecnologias") {
+      propositos_count[1] <- propositos_count[1] + 1
+    } else if (r1 == "Auxílio na escrita de código") {
+      propositos_count[2] <- propositos_count[2] + 1
+    } else if (r1 == "Auxílio na escrita de testes automáticos") {
+      propositos_count[3] <- propositos_count[3] + 1
+    } else if (r1 == "Auxílio na escrita de textos em linguagem natural") {
+      propositos_count[4] <- propositos_count[4] + 1
+    } else if (r1 == "Debugging e investigação de problemas") {
+      propositos_count[5] <- propositos_count[5] + 1
+    } else if (r1 == "Resolução de dúvidas") {
+      propositos_count[6] <- propositos_count[6] + 1
+    }
+  }
+}
+
+propositos_freq <- data.frame(Var1 = propositos_names, Freq = propositos_count)
+
+propositos_freq$Freq <- round(((propositos_freq$Freq / nrow(subset(caracterizacao_amostra, `Propositos ferramentas` != ""))) * 100), 1)
+
+ggplot(propositos_freq, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
+  geom_text(aes(label = Freq), vjust = 1.2, color = "white", size = 3) +
+  labs(x = "", y = "%", title = "Propósitos de uso das ferramentas")
 
 # ______________________________________________________________________________
 
@@ -199,7 +248,7 @@ tempo_uso_tabnine_plot <- tempo_uso_tabnine_freq %>%
   geom_text(aes(label = Freq), vjust = -0.5, color = "black", size = 3) +
   labs(x = "", y = "%", title = "Tempo de uso - Tabnine")
 
-  grid.arrange(tempo_uso_chat_gpt_plot, tempo_uso_bing_plot, tempo_uso_copilot_plot, tempo_uso_tabnine_plot)
+grid.arrange(tempo_uso_chat_gpt_plot, tempo_uso_bing_plot, tempo_uso_copilot_plot, tempo_uso_tabnine_plot)
 
 # ______________________________________________________________________________
 
@@ -345,32 +394,32 @@ hipotese1_produtividade_freq <- as.data.frame(table(hipotese1_produtividade$Resp
 hipotese1_produtividade_freq$Freq <- round(((hipotese1_produtividade_freq$Freq / sum(hipotese1_produtividade_freq$Freq)) * 100), 1)
 
 hipotese1_produtividade_plot <- ggplot(hipotese1_produtividade_freq, aes(x = Var1, y = Freq)) +
-  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
-  labs(x = "", y = "%", title = "Hipótese 1")
+  geom_bar(stat = "identity", fill = "#f8766d") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 1: produtividade")
 
 hipotese2_satisfacao_freq <- as.data.frame(table(hipotese2_satisfacao$Resposta))
 
 hipotese2_satisfacao_freq$Freq <- round(((hipotese2_satisfacao_freq$Freq / sum(hipotese2_satisfacao_freq$Freq)) * 100), 1)
 
 hipotese2_satisfacao_plot <- ggplot(hipotese2_satisfacao_freq, aes(x = Var1, y = Freq)) +
-  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
-  labs(x = "", y = "%", title = "Hipótese 2")
+  geom_bar(stat = "identity", fill = "#7cae00") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 2: satisfação")
 
 hipotese3_cargos_freq <- as.data.frame(table(hipotese3_cargos$Resposta))
 
 hipotese3_cargos_freq$Freq <- round(((hipotese3_cargos_freq$Freq / sum(hipotese3_cargos_freq$Freq)) * 100), 1)
 
 hipotese3_cargos_plot <- ggplot(hipotese3_cargos_freq, aes(x = Var1, y = Freq)) +
-  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
-  labs(x = "", y = "%", title = "Hipótese 3")
+  geom_bar(stat = "identity", fill = "#00bfc4") +  theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 3: cargos")
 
 hipotese4_futuro_freq <- as.data.frame(table(hipotese4_futuro$Resposta))
 
 hipotese4_futuro_freq$Freq <- round(((hipotese4_futuro_freq$Freq / sum(hipotese4_futuro_freq$Freq)) * 100), 1)
 
 hipotese4_futuro_plot <- ggplot(hipotese4_futuro_freq, aes(x = Var1, y = Freq)) +
-  geom_bar(stat = "identity", fill = "steelblue") + theme_minimal() +
-  labs(x = "", y = "%", title = "Hipótese 4")
+  geom_bar(stat = "identity", fill = "#c77cff") + theme_minimal() +
+  labs(x = "", y = "%", title = "Variável 4: futuro")
 
 grid.arrange(hipotese1_produtividade_plot, hipotese2_satisfacao_plot, hipotese3_cargos_plot, hipotese4_futuro_plot, nrow = 2, ncol = 2)
 
@@ -657,10 +706,11 @@ ic_resumo <- data.frame(
 )
 
 ggplot(ic_resumo, aes(x = variavel, y = valor, fill = variavel)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity") + theme_minimal() +
   geom_errorbar(aes(ymin = ic_inferior, ymax = ic_superior), width = 0.4, color = "black") +
   geom_text(aes(label = valor), vjust = -0.5, hjust = -0.25) +
   geom_text(aes(label = ic_inferior, y = ic_inferior), vjust = 1.5) +
   geom_text(aes(label = ic_superior, y = ic_superior), vjust = -0.5) +
   coord_cartesian(ylim = c(0, max(ic_resumo$valor) * 1.3)) +
   labs(title = "Intervalos de confiança", x = "Variável", y = "Valor", fill = "Variável")
+
