@@ -395,7 +395,7 @@ hipotese1_produtividade_freq$Freq <- round(((hipotese1_produtividade_freq$Freq /
 
 hipotese1_produtividade_plot <- ggplot(hipotese1_produtividade_freq, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity", fill = "#f8766d") +  theme_minimal() +
-  labs(x = "", y = "%", title = "Variável 1: produtividade")
+  labs(x = "Respostas na escala Likert", y = "% das respostas", title = "Variável 1: impacto na produtividade")
 
 hipotese2_satisfacao_freq <- as.data.frame(table(hipotese2_satisfacao$Resposta))
 
@@ -403,7 +403,7 @@ hipotese2_satisfacao_freq$Freq <- round(((hipotese2_satisfacao_freq$Freq / sum(h
 
 hipotese2_satisfacao_plot <- ggplot(hipotese2_satisfacao_freq, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity", fill = "#7cae00") +  theme_minimal() +
-  labs(x = "", y = "%", title = "Variável 2: satisfação")
+  labs(x = "Respostas na escala Likert", y = "% das respostas", title = "Variável 2: impacto na satisfação")
 
 hipotese3_cargos_freq <- as.data.frame(table(hipotese3_cargos$Resposta))
 
@@ -411,7 +411,7 @@ hipotese3_cargos_freq$Freq <- round(((hipotese3_cargos_freq$Freq / sum(hipotese3
 
 hipotese3_cargos_plot <- ggplot(hipotese3_cargos_freq, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity", fill = "#00bfc4") +  theme_minimal() +
-  labs(x = "", y = "%", title = "Variável 3: cargos")
+  labs(x = "Respostas na escala Likert", y = "% das respostas", title = "Variável 3: sentimento quanto a mudanças no mercado de trabalho")
 
 hipotese4_futuro_freq <- as.data.frame(table(hipotese4_futuro$Resposta))
 
@@ -419,7 +419,7 @@ hipotese4_futuro_freq$Freq <- round(((hipotese4_futuro_freq$Freq / sum(hipotese4
 
 hipotese4_futuro_plot <- ggplot(hipotese4_futuro_freq, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity", fill = "#c77cff") + theme_minimal() +
-  labs(x = "", y = "%", title = "Variável 4: futuro")
+  labs(x = "Respostas na escala Likert", y = "% das respostas", title = "Variável 4: sentimento em relação ao futuro")
 
 grid.arrange(hipotese1_produtividade_plot, hipotese2_satisfacao_plot, hipotese3_cargos_plot, hipotese4_futuro_plot, nrow = 2, ncol = 2)
 
